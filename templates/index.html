@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLConsulting - Gestión de Habilitaciones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-mesh"></div>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar glass-panel">
+            <div class="logo">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>HLConsulting</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-section="dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</li>
+                <li data-section="empresas"><i class="fa-solid fa-building"></i> Empresas</li>
+                <li data-section="vigiladores"><i class="fa-solid fa-users"></i> Vigiladores</li>
+                <li data-section="asignaciones"><i class="fa-solid fa-briefcase"></i> Asignaciones</li>
+                <li data-section="tramites"><i class="fa-solid fa-folder-open"></i> Tr&aacute;mites</li>
+                <li data-section="informe"><i class="fa-solid fa-chart-bar"></i> Informe de Estado</li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header glass-panel">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" alt="Admin">
+                </div>
+            </header>
+
+            <div class="content-scroll">
+                
+                <!-- DASHBOARD -->
+                <section id="sec-dashboard" class="content-section active">
+                    <div class="stats-grid">
+                        <a href="#" class="stat-card glass-panel" onclick="document.querySelector('[data-section=empresas]').click(); return false;" style="text-decoration:none;">
+                            <div class="stat-icon"><i class="fa-solid fa-building"></i></div>
+                            <div class="stat-info">
+                                <h3 id="count-empresas">0</h3>
+                                <p>Empresas Activas</p>
+                            </div>
+                        </a>
+                        <a href="#" class="stat-card glass-panel" onclick="document.querySelector('[data-section=vigiladores]').click(); return false;" style="text-decoration:none;">
+                            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                            <div class="stat-info">
+                                <h3 id="count-vigiladores">0</h3>
+                                <p>Vigiladores Registrados</p>
+                            </div>
+                        </a>
+                        <a href="#" class="stat-card glass-panel" onclick="document.querySelector('[data-section=tramites]').click(); return false;" style="text-decoration:none;">
+                            <div class="stat-icon"><i class="fa-solid fa-file-signature"></i></div>
+                            <div class="stat-info">
+                                <h3 id="count-tramites">0</h3>
+                                <p>Trámites en Curso</p>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Alertas de Vencimiento -->
+                    <div class="section-header" style="margin-top: 2rem;">
+                        <h2>Alertas de Vencimiento</h2>
+                    </div>
+                    <div class="tramites-grid" id="grid-alertas">
+                        <!-- Alertas inyectadas por JS -->
+                    </div>
+                </section>
+
+                <!-- EMPRESAS -->
+                <section id="sec-empresas" class="content-section">
+                    <div class="section-header">
+                        <h2>Gesti&oacute;n de Empresas</h2>
+                        <button class="btn-primary" onclick="openModal('modal-empresa')"><i class="fa-solid fa-plus"></i> Nueva Empresa</button>
+                    </div>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-empresas" placeholder="Buscar empresa..." oninput="filterTable('tbody-empresas', this.value)">
+                    </div>
+                    <div class="card glass-panel table-container">
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>CUIT</th>
+                                    <th>Tel&eacute;fono</th>
+                                    <th>Vencimiento Hab.</th>
+                                    <th>Acciones <br> Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-empresas">
+                                <!-- Data injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- VIGILADORES -->
+                <section id="sec-vigiladores" class="content-section">
+                    <div class="section-header">
+                        <h2>Personal / Vigiladores</h2>
+                        <button class="btn-primary" onclick="openModal('modal-vigilador')"><i class="fa-solid fa-plus"></i> Nuevo Personal</button>
+                    </div>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-vigiladores" placeholder="Buscar por nombre o DNI..." oninput="filterTable('tbody-vigiladores', this.value)">
+                    </div>
+                    <div class="card glass-panel table-container">
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre Completo</th>
+                                    <th>DNI</th>
+                                    <th>Legajo</th>
+                                    <th>Vencimiento Hab.</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-vigiladores">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ASIGNACIONES -->
+                <section id="sec-asignaciones" class="content-section">
+                    <div class="section-header">
+                        <h2>Asignaciones y Roles</h2>
+                        <button class="btn-primary" onclick="openModal('modal-asignacion')"><i class="fa-solid fa-link"></i> Nueva Asignación</button>
+                    </div>
+                    <div class="card glass-panel table-container">
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Vigilador</th>
+                                    <th>Empresa</th>
+                                    <th>Roles Activos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-asignaciones">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- TRAMITES -->
+                <section id="sec-tramites" class="content-section">
+                    <div class="section-header">
+                        <h2>Tramites y Documentación</h2>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="search-tramites" placeholder="Filtrar por nombre..." oninput="filterTramites(this.value)">
+                            </div>
+                            <button class="btn-primary" onclick="openModal('modal-tramite')"><i class="fa-solid fa-file-circle-plus"></i> Iniciar Trámite</button>
+                        </div>
+                    </div>
+                    <div class="tramites-grid" id="grid-tramites">
+                        <!-- Cards injected by JS -->
+                    </div>
+                </section>
+
+                <!-- INFORME DE ESTADO -->
+                <section id="sec-informe" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-chart-bar"></i> Informe de Estado</h2>
+                    </div>
+                    <!-- Buscador de empresa -->
+                    <div class="informe-search-wrap">
+                        <div class="search-bar" style="max-width:600px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="search-informe" placeholder="Buscar empresa por nombre o CUIT..." oninput="searchInforme(this.value)" autocomplete="off">
+                        </div>
+                        <ul id="informe-suggestions" class="informe-dropdown"></ul>
+                    </div>
+                    <!-- Dashboard result -->
+                    <div id="informe-dashboard" style="display:none;">
+                        <!-- Header Empresa -->
+                        <div class="informe-header glass-panel">
+                            <div class="informe-title">
+                                <h2 id="inf-nombre"></h2>
+                                <span id="inf-cuit" class="inf-label"></span>
+                            </div>
+                            <div class="informe-meta">
+                                <div class="inf-meta-item"><i class="fa-solid fa-location-dot"></i> <span id="inf-dir">-</span></div>
+                                <div class="inf-meta-item"><i class="fa-solid fa-phone"></i> <a id="inf-tel-link" href="#"><span id="inf-tel">-</span></a></div>
+                                <div class="inf-meta-item"><i class="fa-solid fa-envelope"></i> <a id="inf-email-link" href="#"><span id="inf-email">-</span></a></div>
+                                <div class="inf-meta-item"><i class="fa-solid fa-calendar"></i> Vto. Hab: <span id="inf-vto">-</span></div>
+                            </div>
+                            <div id="inf-estado-badge" class="inf-estado-badge"></div>
+                        </div>
+
+                        <!-- Jurisdicciones -->
+                        <div class="section-header" style="margin-top:2rem;">
+                            <h3><i class="fa-solid fa-map-location-dot"></i> Estado por Jurisdicción</h3>
+                        </div>
+                        <div id="inf-jurisdicciones" class="inf-jurisd-grid"></div>
+
+                        <!-- Vigiladores -->
+                        <div class="section-header" style="margin-top:2rem;">
+                            <h3><i class="fa-solid fa-users"></i> Personal Asignado</h3>
+                        </div>
+                        <div class="card glass-panel table-container">
+                            <table class="styled-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>DNI</th>
+                                        <th>Legajo</th>
+                                        <th>Vto. Habilitación</th>
+                                        <th>Estado</th>
+                                        <th>Roles / Trámites</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inf-tbody-vigiladores"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Modal Empresa -->
+    <div id="modal-empresa" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>Registrar Empresa</h2>
+                <button class="close-btn" onclick="closeModal('modal-empresa')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-empresa">
+                <div class="input-group">
+                    <label>Nombre de la Empresa</label>
+                    <input type="text" id="emp-nombre" required style="text-transform: uppercase;">
+                </div>
+                <div class="input-group">
+                    <label>CUIT</label>
+                    <input type="text" id="emp-cuit" required>
+                </div>
+                <div class="input-group">
+                    <label>Dirección</label>
+                    <input type="text" id="emp-direccion">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="emp-telefono">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="emp-email">
+                </div>
+                <div class="input-group">
+                    <label>Fecha de Alta</label>
+                    <input type="date" id="emp-alta">
+                </div>
+                <div class="input-group">
+                    <label>Vencimiento Habilitación</label>
+                    <input type="date" id="emp-vence">
+                </div>
+                <div class="input-group full-width">
+                    <label>Jurisdicciones Habilitadas</label>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="emp-juris" value="CABA"> CABA</label>
+                        <label><input type="checkbox" name="emp-juris" value="PBA"> PBA</label>
+                        <label><input type="checkbox" name="emp-juris" value="PSA-SICOP"> PSA-SICOP</label>
+                        <label><input type="checkbox" name="emp-juris" value="PNA"> PNA</label>
+                        <label><input type="checkbox" name="emp-juris" value="ANMAC"> ANMAC</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary w-100">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Vigilador -->
+    <div id="modal-vigilador" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>Registrar Personal</h2>
+                <button class="close-btn" onclick="closeModal('modal-vigilador')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-vigilador">
+                <div class="input-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="vig-nombre" required style="text-transform: uppercase;">
+                </div>
+                <div class="input-group">
+                    <label>DNI</label>
+                    <input type="text" id="vig-dni" required>
+                </div>
+                <div class="input-group">
+                    <label>Legajo</label>
+                    <input type="text" id="vig-legajo">
+                </div>
+                <div class="input-group">
+                    <label>Domicilio</label>
+                    <input type="text" id="vig-domicilio">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="vig-telefono">
+                </div>
+                <div class="input-group">
+                    <label>Fecha de Alta</label>
+                    <input type="date" id="vig-alta">
+                </div>
+                <div class="input-group">
+                    <label>Vencimiento Habilitación</label>
+                    <input type="date" id="vig-vence">
+                </div>
+                <button type="submit" class="btn-primary w-100">Guardar</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Asignacion -->
+    <div id="modal-asignacion" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>Vincular Empleado a Empresa</h2>
+                <button class="close-btn" onclick="closeModal('modal-asignacion')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-asignacion">
+                <div class="input-group">
+                    <label>Vigilador</label>
+                    <select id="asig-vigilador" required></select>
+                </div>
+                <div class="input-group">
+                    <label>Empresa</label>
+                    <select id="asig-empresa" required></select>
+                </div>
+                <button type="submit" class="btn-primary w-100">Crear Vínculo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Rol a Asignacion -->
+    <div id="modal-rol" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>Asignar Función/Rol</h2>
+                <button class="close-btn" onclick="closeModal('modal-rol')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-rol">
+                <input type="hidden" id="rol-asignacion-id">
+                <div class="input-group">
+                    <label>Seleccionar Rol</label>
+                    <select id="rol-select" required></select>
+                </div>
+                <button type="submit" class="btn-primary w-100">Añadir Rol</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-tramite" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>Iniciar Trámite</h2>
+                <button class="close-btn" onclick="closeModal('modal-tramite')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-tramite">
+                <div class="input-group">
+                    <label>Candidato / Rol</label>
+                    <select id="tram-asignacion-rol" required></select>
+                </div>
+                <div class="input-group">
+                    <label>Tipo de Trámite</label>
+                    <select id="tram-tipo" required></select>
+                </div>
+                <button type="submit" class="btn-primary w-100">Generar Checklist Automático</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Checklist Modal View -->
+    <div id="modal-checklist" class="modal-overlay">
+        <div class="modal-content glass-panel modal-lg">
+            <div class="modal-header">
+                <h2>Checklist del Trámite #<span id="check-tramite-id"></span></h2>
+                <button class="close-btn" onclick="closeModal('modal-checklist')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="checklist-container" id="checklist-items">
+                <!-- Requirements injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Empresa -->
+    <div id="modal-edit-empresa" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-pen"></i> Editar Empresa</h2>
+                <button class="close-btn" onclick="closeModal('modal-edit-empresa')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-edit-empresa">
+                <input type="hidden" id="edit-emp-id">
+                <div class="input-group">
+                    <label>Nombre de la Empresa</label>
+                    <input type="text" id="edit-emp-nombre" required style="text-transform: uppercase;">
+                </div>
+                <div class="input-group">
+                    <label>CUIT</label>
+                    <input type="text" id="edit-emp-cuit" required>
+                </div>
+                <div class="input-group">
+                    <label>Dirección</label>
+                    <input type="text" id="edit-emp-direccion">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="edit-emp-telefono">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="edit-emp-email">
+                </div>
+                <div class="input-group">
+                    <label>Fecha de Alta</label>
+                    <input type="date" id="edit-emp-alta">
+                </div>
+                <div class="input-group">
+                    <label>Vencimiento Habilitación</label>
+                    <input type="date" id="edit-emp-vence">
+                </div>
+                <div class="input-group full-width">
+                    <label>Jurisdicciones Habilitadas</label>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="edit-emp-juris" value="CABA"> CABA</label>
+                        <label><input type="checkbox" name="edit-emp-juris" value="PBA"> PBA</label>
+                        <label><input type="checkbox" name="edit-emp-juris" value="PSA-SICOP"> PSA-SICOP</label>
+                        <label><input type="checkbox" name="edit-emp-juris" value="PNA"> PNA</label>
+                        <label><input type="checkbox" name="edit-emp-juris" value="ANMAC"> ANMAC</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary w-100">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Vigilador -->
+    <div id="modal-edit-vigilador" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-pen"></i> Editar Personal</h2>
+                <button class="close-btn" onclick="closeModal('modal-edit-vigilador')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-edit-vigilador">
+                <input type="hidden" id="edit-vig-id">
+                <div class="input-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="edit-vig-nombre" required style="text-transform: uppercase;">
+                </div>
+                <div class="input-group">
+                    <label>DNI</label>
+                    <input type="text" id="edit-vig-dni" required>
+                </div>
+                <div class="input-group">
+                    <label>Legajo</label>
+                    <input type="text" id="edit-vig-legajo">
+                </div>
+                <div class="input-group">
+                    <label>Domicilio</label>
+                    <input type="text" id="edit-vig-domicilio">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="edit-vig-telefono">
+                </div>
+                <div class="input-group">
+                    <label>Fecha de Alta</label>
+                    <input type="date" id="edit-vig-alta">
+                </div>
+                <div class="input-group">
+                    <label>Vencimiento Habilitación</label>
+                    <input type="date" id="edit-vig-vence">
+                </div>
+                <button type="submit" class="btn-primary w-100">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Acción Jurisdicción (Informe) -->
+    <div id="modal-informe-action" class="modal-overlay">
+        <div class="modal-content glass-panel" style="max-width: 400px; text-align: center;">
+            <div class="modal-header">
+                <h2 id="inf-action-title">Opciones de Trámite</h2>
+                <button class="close-btn" onclick="closeModal('modal-informe-action')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="inf-action-body" style="padding: 20px 0; display: flex; flex-direction: column; gap: 15px;">
+                <!-- Botones se insertan dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
