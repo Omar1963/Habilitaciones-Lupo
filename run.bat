@@ -11,6 +11,9 @@ call .\venv\Scripts\activate.bat
 py -m pip install --upgrade pip
 py -m pip install -r requirements.txt
 
+echo Asegurando usuarios (admin, Jose)...
+py seed_users.py
+
 echo Iniciando el servidor FastAPI...
 py -m uvicorn main:app --reload
 pause

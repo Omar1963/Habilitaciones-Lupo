@@ -5,35 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HLConsulting - Gestión de Habilitaciones</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="static/css/style.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body onload="initApp()">
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div class="login-card glass-panel">
+            <div class="login-logo"><i class="fa-solid fa-shield-halved"></i> LUPO</div>
+            <div class="login-welcome">
+                <h2>Bienvenido al sistema</h2>
+                <p>-Habilitaciones Digitales- <strong>Gestiones Lupo</strong></p>
+                <small style="display:block; margin-top:10px; opacity:0.7;">"Manejo inteligente y seguro a través de la digitalización de la información"</small>
+            </div>
+            <form id="form-login">
+                <div class="input-group">
+                    <input type="text" id="login-username" placeholder="Usuario" required autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="login-password" placeholder="Contraseña" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn-primary w-100">Ingresar al Sistema</button>
+            </form>
+            <div id="login-error" style="color:var(--danger); margin-top:1rem; font-size:0.85rem; display:none;"></div>
+        </div>
+    </div>
     <div class="background-mesh"></div>
     <div class="app-container">
         <!-- Sidebar -->
         <nav class="sidebar glass-panel">
             <div class="logo">
                 <i class="fa-solid fa-shield-halved"></i>
-                <span>HLConsulting</span>
+                <span>Gestiones Lupo</span>
             </div>
             <ul class="nav-links">
                 <li class="active" data-section="dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</li>
+                <li data-section="usuarios" id="nav-usuarios" style="display:none;"><i class="fa-solid fa-users-gear"></i> Usuarios</li>
                 <li data-section="empresas"><i class="fa-solid fa-building"></i> Empresas</li>
                 <li data-section="vigiladores"><i class="fa-solid fa-users"></i> Vigiladores</li>
                 <li data-section="asignaciones"><i class="fa-solid fa-briefcase"></i> Asignaciones</li>
                 <li data-section="tramites"><i class="fa-solid fa-folder-open"></i> Tr&aacute;mites</li>
-                <li data-section="informe"><i class="fa-solid fa-chart-bar"></i> Informe de Estado</li>
+                <li data-section="informe"><i class="fa-solid fa-file-invoice"></i> Informe de Estado</li>
+                <li data-section="biblioteca"><i class="fa-solid fa-book-open-reader"></i> Biblioteca</li>
             </ul>
+            <div class="sidebar-bottom">
+                <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Salir del Sistema</button>
+            </div>
         </nav>
 
         <!-- Main Content -->
         <main class="main-content">
             <header class="top-header glass-panel">
                 <h1 id="page-title">Dashboard</h1>
-                <div class="user-profile">
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" alt="Admin">
+                <div class="user-profile" onclick="toggleUserDropdown(event)">
+                    <div class="user-info">
+                        <span class="user-name" id="display-user-name">Usuario</span>
+                        <span class="user-role" id="display-user-role">Rol</span>
+                    </div>
+                    <img id="display-user-img" src="https://ui-avatars.com/api/?name=U&background=random" alt="User">
+                    
+                    <!-- Dropdown -->
+                    <div id="user-dropdown" class="user-dropdown glass-panel">
+                        <div id="admin-menu" style="display:none;">
+                            <a href="#" class="user-dropdown-item" onclick="showSection('seguridad')">
+                                <i class="fa-solid fa-user-gear"></i> Gestión de Usuarios
+                            </a>
+                            <a href="#" class="user-dropdown-item">
+                                <i class="fa-solid fa-list-check"></i> Log de Actividad
+                            </a>
+                            <div class="user-dropdown-divider"></div>
+                        </div>
+                        <a href="#" class="user-dropdown-item" onclick="openModal('modal-profile')">
+                            <i class="fa-solid fa-user-pen"></i> Mi Perfil
+                        </a>
+                        <a href="#" class="user-dropdown-item" onclick="logout()" style="color:var(--danger)">
+                            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                        </a>
+                    </div>
                 </div>
             </header>
 
@@ -64,10 +113,92 @@
                             </div>
                         </a>
                     </div>
+
+                    <div class="dashboard-hero glass-panel">
+                        <div>
+                            <span class="dashboard-eyebrow">Centro de control</span>
+                            <h2>Tablero grafico de gestion documental</h2>
+                            <p>Visualiza avance operativo, concentracion de tramites y riesgo de vencimientos desde una sola vista.</p>
+                        </div>
+                        <div class="dashboard-hero-metrics">
+                            <div class="hero-metric">
+                                <span>Eficiencia documental</span>
+                                <strong id="metric-eficiencia">0%</strong>
+                            </div>
+                            <div class="hero-metric">
+                                <span>Alertas activas</span>
+                                <strong id="metric-alertas">0</strong>
+                            </div>
+                            <div class="hero-metric">
+                                <span>Jurisdicciones activas</span>
+                                <strong id="metric-jurisdicciones">0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-analytics-grid">
+                        <article class="dashboard-panel glass-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <span class="panel-kicker">Cobertura</span>
+                                    <h3>Estado de requisitos</h3>
+                                </div>
+                                <span class="panel-caption" id="req-total-label">0 documentos</span>
+                            </div>
+                            <div class="donut-layout">
+                                <div id="chart-requisitos-donut" class="donut-chart"></div>
+                                <div id="chart-requisitos-legend" class="chart-legend"></div>
+                            </div>
+                        </article>
+
+                        <article class="dashboard-panel glass-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <span class="panel-kicker">Carga operativa</span>
+                                    <h3>Tramites por jurisdiccion</h3>
+                                </div>
+                                <span class="panel-caption">Distribucion actual</span>
+                            </div>
+                            <div id="chart-jurisdicciones" class="stack-list"></div>
+                        </article>
+
+                        <article class="dashboard-panel glass-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <span class="panel-kicker">Tendencia</span>
+                                    <h3>Tramites iniciados por mes</h3>
+                                </div>
+                                <span class="panel-caption">Ultimos 6 meses</span>
+                            </div>
+                            <div id="chart-timeline" class="timeline-chart"></div>
+                        </article>
+
+                        <article class="dashboard-panel glass-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <span class="panel-kicker">Riesgo</span>
+                                    <h3>Vencimientos y vigencias</h3>
+                                </div>
+                                <div class="panel-header-actions">
+                                    <span class="panel-caption" id="risk-panel-caption">Empresas y personal</span>
+                                    <select id="dashboard-risk-filter" class="panel-filter">
+                                        <option value="todos">Totales</option>
+                                        <option value="empresas">Empresas</option>
+                                        <option value="personal">Personal</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="chart-vencimientos" class="status-split"></div>
+                            <div id="dashboard-risk-story" class="risk-story"></div>
+                        </article>
+                    </div>
                     
                     <!-- Alertas de Vencimiento -->
-                    <div class="section-header" style="margin-top: 2rem;">
-                        <h2>Alertas de Vencimiento</h2>
+                    <div class="section-header dashboard-alerts-header" style="margin-top: 2rem;">
+                        <div>
+                            <h2>Alertas de Vencimiento</h2>
+                            <p id="alertas-summary" class="section-subtitle">Vista consolidada de empresas y personal.</p>
+                        </div>
                     </div>
                     <div class="tramites-grid" id="grid-alertas">
                         <!-- Alertas inyectadas por JS -->
@@ -78,7 +209,7 @@
                 <section id="sec-empresas" class="content-section">
                     <div class="section-header">
                         <h2>Gesti&oacute;n de Empresas</h2>
-                        <button class="btn-primary" onclick="openModal('modal-empresa')"><i class="fa-solid fa-plus"></i> Nueva Empresa</button>
+                        <button class="btn-primary write-action" onclick="openModal('modal-empresa')"><i class="fa-solid fa-plus"></i> Nueva Empresa</button>
                     </div>
                     <div class="search-bar">
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -88,12 +219,12 @@
                         <table class="styled-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
                                     <th>Nombre</th>
                                     <th>CUIT</th>
-                                    <th>Tel&eacute;fono</th>
+                                    <th>Jurisdicciones</th>
                                     <th>Vencimiento Hab.</th>
-                                    <th>Acciones <br> Eliminar</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-empresas">
@@ -107,7 +238,7 @@
                 <section id="sec-vigiladores" class="content-section">
                     <div class="section-header">
                         <h2>Personal / Vigiladores</h2>
-                        <button class="btn-primary" onclick="openModal('modal-vigilador')"><i class="fa-solid fa-plus"></i> Nuevo Personal</button>
+                        <button class="btn-primary write-action" onclick="openModal('modal-vigilador')"><i class="fa-solid fa-plus"></i> Nuevo Personal</button>
                     </div>
                     <div class="search-bar">
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -122,6 +253,7 @@
                                     <th>DNI</th>
                                     <th>Legajo</th>
                                     <th>Vencimiento Hab.</th>
+                                    <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -135,7 +267,7 @@
                 <section id="sec-asignaciones" class="content-section">
                     <div class="section-header">
                         <h2>Asignaciones y Roles</h2>
-                        <button class="btn-primary" onclick="openModal('modal-asignacion')"><i class="fa-solid fa-link"></i> Nueva Asignación</button>
+                        <button class="btn-primary write-action" onclick="openModal('modal-asignacion')"><i class="fa-solid fa-link"></i> Nueva Asignación</button>
                     </div>
                     <div class="card glass-panel table-container">
                         <table class="styled-table">
@@ -158,12 +290,18 @@
                 <section id="sec-tramites" class="content-section">
                     <div class="section-header">
                         <h2>Tramites y Documentación</h2>
-                        <div style="display:flex; gap:10px; align-items:center;">
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <input type="date" id="filter-date" class="search-box" style="min-width:150px; padding:0.4rem;" onchange="filterTramitesByDate(this.value)">
+                            <select id="sort-tramites" class="search-box" style="min-width:150px; padding:0.4rem;" onchange="sortTramites(this.value)">
+                                <option value="newest">+ Nuevo</option>
+                                <option value="oldest">+ Antiguo</option>
+                                <option value="alphabetical">Alfabético</option>
+                            </select>
                             <div class="search-box">
                                 <i class="fa-solid fa-magnifying-glass"></i>
                                 <input type="text" id="search-tramites" placeholder="Filtrar por nombre..." oninput="filterTramites(this.value)">
                             </div>
-                            <button class="btn-primary" onclick="openModal('modal-tramite')"><i class="fa-solid fa-file-circle-plus"></i> Iniciar Trámite</button>
+                            <button class="btn-primary" onclick="openModal('modal-tramite')"><i class="fa-solid fa-file-circle-plus"></i> Iniciar</button>
                         </div>
                     </div>
                     <div class="tramites-grid" id="grid-tramites">
@@ -215,17 +353,74 @@
                             <table class="styled-table">
                                 <thead>
                                     <tr>
-                                        <th>Nombre</th>
-                                        <th>DNI</th>
-                                        <th>Legajo</th>
-                                        <th>Vto. Habilitación</th>
+                                        <th onclick="sortEmpresas('nombre')">Nombre <i class="fa-solid fa-sort"></i></th>
+                                        <th>CUIT</th>
+                                        <th>Jurisdicciones</th>
+                                        <th onclick="sortEmpresas('vencimiento')">Vto. Hab. <i class="fa-solid fa-sort"></i></th>
                                         <th>Estado</th>
-                                        <th>Roles / Trámites</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="inf-tbody-vigiladores"></tbody>
                             </table>
                         </div>
+                    </div>
+                </section>
+
+                <!-- BIBLIOTECA -->
+                <section id="sec-biblioteca" class="content-section">
+                    <div class="section-header">
+                        <h2>Biblioteca documental y normativa</h2>
+                        <button class="btn-primary write-action" onclick="openModal('modal-biblioteca')"><i class="fa-solid fa-file-circle-plus"></i> Cargar documento</button>
+                    </div>
+                    <div class="search-bar biblioteca-toolbar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-biblioteca" placeholder="Buscar por titulo, tema, organismo o tags..." oninput="renderBiblioteca()">
+                        <select id="filter-biblioteca-categoria" onchange="renderBiblioteca()">
+                            <option value="">Todas las categorias</option>
+                            <option value="Normativa">Normativa</option>
+                            <option value="Biblioteca documental">Biblioteca documental</option>
+                        </select>
+                        <input type="text" id="filter-biblioteca-jurisdiccion" placeholder="Jurisdiccion" oninput="renderBiblioteca()">
+                    </div>
+                    <div class="card glass-panel table-container">
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>Titulo</th>
+                                    <th>Categoria</th>
+                                    <th>Jurisdiccion</th>
+                                    <th>Organismo</th>
+                                    <th>Tema</th>
+                                    <th>Vigencia</th>
+                                    <th>Vinculo</th>
+                                    <th>Archivo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-biblioteca"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SEGURIDAD / USUARIOS -->
+                <section id="sec-usuarios" class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Usuarios</h2>
+                        <button class="btn-primary" onclick="openModal('modal-usuario')"><i class="fa-solid fa-user-plus"></i> Nuevo Usuario</button>
+                    </div>
+                    <div class="card glass-panel table-container">
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>Usuario / Empresa</th>
+                                    <th>Rol</th>
+                                    <th>Privilegio</th>
+                                    <th>Empresa Vinculada</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-usuarios"></tbody>
+                        </table>
                     </div>
                 </section>
 
@@ -389,12 +584,120 @@
     <div id="modal-checklist" class="modal-overlay">
         <div class="modal-content glass-panel modal-lg">
             <div class="modal-header">
-                <h2>Checklist del Trámite #<span id="check-tramite-id"></span></h2>
+                <h2>Checklist del Tramite <span id="check-tramite-label"></span></h2>
                 <button class="close-btn" onclick="closeModal('modal-checklist')"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            <div id="check-tramite-owner" class="checklist-owner-summary"></div>
             <div class="checklist-container" id="checklist-items">
                 <!-- Requirements injected here -->
             </div>
+        </div>
+    </div>
+
+    <div id="modal-upload-documento" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>Adjuntar Documentacion</h2>
+                <button class="close-btn" onclick="closeModal('modal-upload-documento')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-upload-documento">
+                <input type="hidden" id="doc-context-type">
+                <input type="hidden" id="doc-context-id">
+                <div class="input-group">
+                    <label>Destino</label>
+                    <input type="text" id="doc-context-label" readonly>
+                </div>
+                <div class="input-group">
+                    <label>Tipo de documento</label>
+                    <input type="text" id="doc-tipo-documento" placeholder="Ej: DNI, Contrato, Estatuto" required>
+                </div>
+                <div class="input-group">
+                    <label>Archivo PDF</label>
+                    <input type="file" id="doc-file" accept="application/pdf,.pdf" required>
+                </div>
+                <div class="input-group">
+                    <label>Observaciones</label>
+                    <input type="text" id="doc-observaciones" placeholder="Opcional">
+                </div>
+                <button type="submit" class="btn-primary w-100">Subir Documento</button>
+            </form>
+            <div style="margin-top:1rem;">
+                <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">Documentos cargados</h3>
+                <div id="doc-upload-existing" class="doc-upload-existing"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-biblioteca" class="modal-overlay">
+        <div class="modal-content glass-panel modal-lg">
+            <div class="modal-header">
+                <h2>Cargar documento de biblioteca</h2>
+                <button class="close-btn" onclick="closeModal('modal-biblioteca')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-biblioteca">
+                <div class="input-group">
+                    <label>Titulo</label>
+                    <input type="text" id="bib-titulo" required>
+                </div>
+                <div class="input-group">
+                    <label>Categoria</label>
+                    <select id="bib-categoria" required>
+                        <option value="Normativa">Normativa</option>
+                        <option value="Biblioteca documental">Biblioteca documental</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Jurisdiccion</label>
+                    <input type="text" id="bib-jurisdiccion" placeholder="Ej: PBA, CABA, ANMAC">
+                </div>
+                <div class="input-group">
+                    <label>Organismo</label>
+                    <input type="text" id="bib-organismo" placeholder="Ej: Ministerio de Seguridad">
+                </div>
+                <div class="input-group">
+                    <label>Tema</label>
+                    <input type="text" id="bib-tema" placeholder="Ej: Renovacion, habilitaciones, normativa">
+                </div>
+                <div class="input-group">
+                    <label>Fecha del documento</label>
+                    <input type="date" id="bib-fecha-documento">
+                </div>
+                <div class="input-group">
+                    <label>Vigencia</label>
+                    <select id="bib-vigencia">
+                        <option value="">No informada</option>
+                        <option value="Vigente">Vigente</option>
+                        <option value="En revision">En revision</option>
+                        <option value="Derogada">Derogada</option>
+                        <option value="Historica">Historica</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Tags</label>
+                    <input type="text" id="bib-tags" placeholder="Separar con comas">
+                </div>
+                <div class="input-group">
+                    <label>Empresa relacionada</label>
+                    <select id="bib-empresa">
+                        <option value="">Sin relacion</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Personal relacionado</label>
+                    <select id="bib-vigilador">
+                        <option value="">Sin relacion</option>
+                    </select>
+                </div>
+                <div class="input-group full-width">
+                    <label>Observaciones</label>
+                    <input type="text" id="bib-observaciones" placeholder="Contexto adicional del documento">
+                </div>
+                <div class="input-group full-width">
+                    <label>Archivo PDF</label>
+                    <input type="file" id="bib-file" accept="application/pdf,.pdf" required>
+                </div>
+                <button type="submit" class="btn-primary w-100">Guardar en biblioteca</button>
+            </form>
         </div>
     </div>
 
@@ -492,7 +795,6 @@
         </div>
     </div>
 
-    <!-- Modal Acción Jurisdicción (Informe) -->
     <div id="modal-informe-action" class="modal-overlay">
         <div class="modal-content glass-panel" style="max-width: 400px; text-align: center;">
             <div class="modal-header">
@@ -501,6 +803,77 @@
             </div>
             <div id="inf-action-body" style="padding: 20px 0; display: flex; flex-direction: column; gap: 15px;">
                 <!-- Botones se insertan dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Usuario Crear/Editar -->
+    <div id="modal-usuario" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2 id="modal-usuario-title"><i class="fa-solid fa-user-plus"></i> Nuevo Usuario</h2>
+                <button class="close-btn" onclick="closeModal('modal-usuario')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-usuario">
+                <input type="hidden" id="user-edit-id" value="">
+                <div class="input-group">
+                    <label>Tipo de Usuario</label>
+                    <select id="user-role" onchange="toggleUserRole(this.value)">
+                        <option value="Admin">Administrador</option>
+                        <option value="Cliente">Cliente (Empresa)</option>
+                        <option value="Consultor">Consultor</option>
+                    </select>
+                </div>
+                <!-- Para Clientes: seleccionar empresa (username = empresa) -->
+                <div class="input-group" id="user-empresa-group" style="display:none;">
+                    <label>Empresa <small style="color:var(--text-secondary)">(será el nombre de usuario)</small></label>
+                    <select id="user-empresa-id"></select>
+                </div>
+                <!-- Para otros roles: ingresar username -->
+                <div class="input-group" id="user-username-group">
+                    <label>Nombre de Usuario</label>
+                    <input type="text" id="user-username" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label id="user-password-label">Contraseña</label>
+                    <input type="password" id="user-password" autocomplete="new-password" placeholder="Contraseña">
+                    <small id="user-password-hint" style="color:var(--text-secondary); display:none; margin-top:4px;">Dejar vacío para no cambiar la contraseña</small>
+                </div>
+                <div class="input-group" id="user-privilege-group">
+                    <label>Privilegio de Acceso</label>
+                    <select id="user-privilege">
+                        <option value="Admin">Administrador (acceso total)</option>
+                        <option value="Editar">Editor (puede modificar datos)</option>
+                        <option value="Ver" selected>Consulta (solo ver y cargar documentos)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary w-100">Guardar Usuario</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Mi Perfil -->
+    <div id="modal-profile" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-user-circle"></i> Mi Perfil</h2>
+                <button class="close-btn" onclick="closeModal('modal-profile')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="profile-details" style="padding: 1rem 0;">
+                <div class="input-group">
+                    <label>Nombre de Usuario</label>
+                    <input type="text" id="profile-username" readonly>
+                </div>
+                <div class="input-group">
+                    <label>Rol asignado</label>
+                    <input type="text" id="profile-role" readonly>
+                </div>
+                <div class="input-group" id="profile-empresa-wrap">
+                    <label>Empresa Vinculada</label>
+                    <input type="text" id="profile-empresa" readonly>
+                </div>
+                <hr style="margin: 1.5rem 0; opacity: 0.1;">
+                <p style="font-size: 0.8rem; color: var(--text-secondary); text-align: center;">Gestiones Lupo - Sistema de Gestión de Habilitaciones</p>
             </div>
         </div>
     </div>
